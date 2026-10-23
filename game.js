@@ -1,7 +1,23 @@
 (() => {
 const $ = id => document.getElementById(id);
-const COL = ['#e8453c', '#f6c234', '#2f7de1', '#3bb54a', '#f26ba8', '#8e5bd6'];
-const COLD = ['#a82a23', '#b8891a', '#1c5aa8', '#257a30', '#b8437a', '#5e3a96'];
+const COL = ['#e8453c', '#f6c234', '#2f7de1', '#3bb54a', '#f26ba8', '#8e5bd6', '#ff8a1f', '#19b8b0', '#8a5a2b', '#3a3f4b'];
+const COLD = ['#a82a23', '#b8891a', '#1c5aa8', '#257a30', '#b8437a', '#5e3a96', '#b85a08', '#0c7a74', '#5a3815', '#16181e'];
+// accessibility: each color also has its own symbol (circle, triangle, square, diamond, star, heart, plus, moon, flower, hexagon)
+function icon(c, x, y, r) { if (c < 0) return; cx.save(); cx.translate(x, y); cx.fillStyle = '#fff'; cx.strokeStyle = 'rgba(0,0,0,.45)'; cx.lineWidth = Math.max(1, r * .22); cx.beginPath();
+  const poly = (n, rad, rot, inner) => { for (let k = 0; k < n * (inner ? 2 : 1); k++) { const a = rot + k * Math.PI * 2 / (n * (inner ? 2 : 1)), rr2 = inner && k % 2 ? rad * inner : rad; k ? cx.lineTo(Math.cos(a) * rr2, Math.sin(a) * rr2) : cx.moveTo(Math.cos(a) * rr2, Math.sin(a) * rr2); } cx.closePath(); };
+  switch (c) {
+    case 0: cx.arc(0, 0, r * .8, 0, 7); break;
+    case 1: poly(3, r, -Math.PI / 2); break;
+    case 2: cx.rect(-r * .72, -r * .72, r * 1.44, r * 1.44); break;
+    case 3: poly(4, r, -Math.PI / 2); break;
+    case 4: poly(5, r * 1.05, -Math.PI / 2, .45); break;
+    case 5: cx.moveTo(0, r * .9); cx.bezierCurveTo(-r * 1.4, -r * .1, -r * .6, -r * 1.2, 0, -r * .35); cx.bezierCurveTo(r * .6, -r * 1.2, r * 1.4, -r * .1, 0, r * .9); break;
+    case 6: { const t = r * .32; cx.rect(-t, -r, t * 2, r * 2); cx.rect(-r, -t, r * 2, t * 2); break; }
+    case 7: cx.arc(0, 0, r * .9, Math.PI * .25, Math.PI * 1.75); cx.arc(r * .45, 0, r * .62, Math.PI * 1.6, Math.PI * .4, true); break;
+    case 8: for (let k = 0; k < 5; k++) { const a = k * Math.PI * 2 / 5; cx.moveTo(Math.cos(a) * r * .5 + r * .42, Math.sin(a) * r * .5); cx.arc(Math.cos(a) * r * .5, Math.sin(a) * r * .5, r * .42, 0, 7); } break;
+    case 9: poly(6, r, 0); break;
+  }
+  cx.stroke(); cx.fill('nonzero'); if (c === 8) { cx.fillStyle = COL[8]; cx.beginPath(); cx.arc(0, 0, r * .28, 0, 7); cx.fill(); } cx.restore(); }
 const META = [
   { sub: 'Tourists are landing! Clear the lot and get everyone to the beach.', twist: 'New: luggage carts block lanes.', fact: 'Hawaiʻi is about 2,400 miles from the U.S. mainland, one of the most remote island chains on Earth.', bg: '#9fd8a0', lot: '#6f7b86' },
   { sub: 'Hotels, surf racks and sunset crowds.', twist: 'New: surfers and chickens wander off after a few buses leave.', fact: 'Waikīkī means “spouting waters,” named for the springs and streams that once fed the area.', bg: '#f3dfa8', lot: '#7d8890' },
@@ -12,7 +28,7 @@ const META = [
 const STORY = [
   '<h1>Aloha, Auntie!</h1><p>Welcome to <b>Aloha Shuttle Co.</b> You’re our new head dispatcher, and the lots are jammed with visitors!</p>',
   '<h3>How to play</h3><p>Tap a shuttle to drive it out. It only goes if the road ahead is clear.</p><p>It parks in a <b>tiki waiting slot</b>. Visitors in matching aloha shirts hop on. Three aboard and it heads to the beach!</p>',
-  '<h3>Careful</h3><p>There are only 5 slots. If they all fill with the wrong colors, the lot jams. Use <b>Shaka Undo</b> anytime. There’s no timer, so take it easy. 🌺</p>',
+  '<h3>Careful</h3><p>There are only 5 slots (later islands may have just 4). If they all fill with the wrong colors, the lot jams. Use <b>Shaka Undo</b> anytime. There’s no timer, so take it easy. 🌺</p>',
 ];
 // ---------- save ----------
 const SK = 'alohaShuttle.v1';
@@ -52,7 +68,7 @@ function postcard(k, after) { overlay(`<h3>📮 Postcard from ${ISLANDS[k].name}
 let L = null, idx = 0, st = null, hist = [], used = 0, boosts = {}, anims = [], blink = null, over = false, deco = [];
 function start(i) {
   idx = i; L = LEVELS[i]; st = AS.init(L); hist = []; used = 0; over = false; anims = []; blink = null;
-  boosts = { undo: 5, hint: 3, slot: 1 };
+  boosts = { undo: 2, hint: 1, slot: L.island >= 2 ? 1 : 0 };
   $('gIsl').textContent = ISLANDS[L.island].name; $('gName').textContent = `${L.id}. ${L.name}`;
   closeOv(); show('game'); Sound.music(L.island); syncBoost(); makeDeco();
   if (L.id === 1 || LEVELS[i - 1] && LEVELS[i - 1].island !== L.island) toast(META[L.island].twist.replace('New: ', '').replace('Finale: ', ''));
@@ -128,12 +144,13 @@ function drawBus(b, X, Y, ang, color, dark, hidden, scale, glow) {
   cx.fillStyle = '#9fe3ff'; const n = Math.max(2, Math.round(len / (c * .42))); for (let k = 0; k < n; k++) { const yy = -len / 2 + c * .45 + k * (len - c * .6) / n; cx.fillRect(-w / 2 + 1, yy, 3, (len - c * .6) / n - 3); cx.fillRect(w / 2 - 4, yy, 3, (len - c * .6) / n - 3); }
   cx.fillStyle = '#fff6c8'; cx.beginPath(); cx.arc(-w * .3, -len / 2 + 2, 2.5, 0, 7); cx.arc(w * .3, -len / 2 + 2, 2.5, 0, 7); cx.fill();
   if (hidden) { cx.fillStyle = '#fff'; cx.font = `900 ${c * .45}px sans-serif`; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText('?', 0, c * .1); }
-  else { cx.fillStyle = '#fff'; cx.beginPath(); const ay = c * .05; cx.moveTo(0, ay - c * .2); cx.lineTo(c * .17, ay + c * .02); cx.lineTo(c * .06, ay + c * .02); cx.lineTo(c * .06, ay + c * .2); cx.lineTo(-c * .06, ay + c * .2); cx.lineTo(-c * .06, ay + c * .02); cx.lineTo(-c * .17, ay + c * .02); cx.closePath(); cx.fill(); }
+  else { cx.fillStyle = '#fff'; cx.beginPath(); const ay = c * .05; cx.moveTo(0, ay - c * .2); cx.lineTo(c * .17, ay + c * .02); cx.lineTo(c * .06, ay + c * .02); cx.lineTo(c * .06, ay + c * .2); cx.lineTo(-c * .06, ay + c * .2); cx.lineTo(-c * .06, ay + c * .02); cx.lineTo(-c * .17, ay + c * .02); cx.closePath(); cx.fill();
+    const ci = COL.indexOf(color); if (ci >= 0) { const by = len / 2 - c * .3; cx.save(); cx.translate(0, by); cx.rotate(-ang); icon(ci, 0, 0, c * .15); cx.restore(); } }
   cx.restore();
 }
 const ANG = { U: 0, R: Math.PI / 2, D: Math.PI, L: -Math.PI / 2 };
 function busCenter(b) { const cs = AS.cells(b); let x = 0, y = 0; cs.forEach(([a, c]) => { x += a; y += c; }); return [G.ox + (x / cs.length + .5) * G.cell, G.oy + (y / cs.length + .5) * G.cell]; }
-function person(x, y, c, s, k) { const skin = ['#f1c9a5', '#d9a27a', '#a8714f', '#7a4e33', '#e8b48c'][k % 5]; cx.fillStyle = COL[c]; rr(x - 7 * s, y - 2 * s, 14 * s, 16 * s, 5 * s); cx.fill(); cx.fillStyle = 'rgba(255,255,255,.75)'; cx.beginPath(); cx.arc(x - 3 * s, y + 4 * s, 1.6 * s, 0, 7); cx.arc(x + 3 * s, y + 9 * s, 1.6 * s, 0, 7); cx.fill(); cx.fillStyle = skin; cx.beginPath(); cx.arc(x, y - 8 * s, 6 * s, 0, 7); cx.fill(); cx.fillStyle = ['#3a2412', '#f0d27a', '#7a4a24', '#222'][k % 4]; cx.beginPath(); cx.arc(x, y - 10 * s, 6 * s, Math.PI, 0); cx.fill(); }
+function person(x, y, c, s, k) { const skin = ['#f1c9a5', '#d9a27a', '#a8714f', '#7a4e33', '#e8b48c'][k % 5]; cx.fillStyle = COL[c]; rr(x - 7 * s, y - 2 * s, 14 * s, 16 * s, 5 * s); cx.fill(); icon(c, x, y + 6 * s, 4.2 * s); cx.fillStyle = skin; cx.beginPath(); cx.arc(x, y - 8 * s, 6 * s, 0, 7); cx.fill(); cx.fillStyle = ['#3a2412', '#f0d27a', '#7a4a24', '#222'][k % 4]; cx.beginPath(); cx.arc(x, y - 10 * s, 6 * s, Math.PI, 0); cx.fill(); }
 function obstacle(o, ex) {
   const c = G.cell, x = G.ox + o.x * c, y = G.oy + o.y * c, w = (o.w || 1) * c, h = (o.h || 1) * c, mx = x + w / 2, my = y + h / 2, act = AS.obsActive(o, ex);
   if (o.t === 'cart') { cx.fillStyle = '#8b98a3'; rr(x + c * .15, y + c * .3, c * .7, c * .5, 5); cx.fill(); ['#e8453c', '#2f7de1', '#f6c234'].forEach((k, j) => { cx.fillStyle = k; rr(x + c * (.2 + j * .2), y + c * (.12 + (j % 2) * .06), c * .18, c * .32, 3); cx.fill(); }); }
