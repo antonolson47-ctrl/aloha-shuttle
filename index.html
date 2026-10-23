@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Aloha Shuttle</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aloha Shuttle">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1f8fa6">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div id="app">
+ <section id="title" class="screen on">
+  <div class="art"><img src="title.jpg" alt="">
+   <div class="sign"><div class="t1">Aloha</div><div class="t2">Shuttle</div></div>
+   <button id="play" class="playhit" aria-label="Play"></button>
+  </div>
+ </section>
+ <section id="map" class="screen">
+  <header class="bar"><button id="mapHome" class="pill">◀</button><div class="ttl">Aloha Shuttle Co.</div><button class="pill snd">♪</button></header>
+  <div id="mapScroll"><div class="mapBanner"></div><div id="islands"></div><p class="foot">Made with aloha for Carey · plays offline</p></div>
+ </section>
+ <section id="game" class="screen">
+  <header class="bar"><button id="toMap" class="pill">◀</button><div class="ttl"><small id="gIsl"></small><span id="gName"></span></div><button class="pill snd">♪</button></header>
+  <canvas id="cv"></canvas>
+  <footer class="boost">
+   <button id="bUndo"><b>↶</b><span>Shaka Undo</span><i id="nUndo"></i></button>
+   <button id="bHint"><b>🥥</b><span>Coconut Tip</span><i id="nHint"></i></button>
+   <button id="bSlot"><b>+1</b><span>Extra Slot</span><i id="nSlot"></i></button>
+   <button id="bRetry"><b>⟲</b><span>Restart</span></button>
+  </footer>
+ </section>
+ <div id="ov" class="ov"><div class="card"><div id="ovBody"></div><div id="ovBtns"></div></div></div>
+ <div id="toast"></div>
+ <div id="rot">Turn your phone upright for the best view 🌺</div>
+</div>
+<script src="core.js"></script><script src="levels.js"></script><script src="audio.js"></script><script src="game.js"></script>
+<script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));</script>
+</body></html>
